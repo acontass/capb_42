@@ -1,15 +1,15 @@
 /* *************************************************************************** */
 /*                                                                             */
 /*                                                         :::      ::::::::   */
-/*   capb_42.c                                           :+:      :+:    :+:   */
+/*   phpcaf_42.c                                         :+:      :+:    :+:   */
 /*                                                     +:+ +:+         +:+     */
 /*   by: acontass <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                 +#+#+#+#+#+   +#+           */
 /*   Created: 2014/04/08 00:17:21 by acontass           #+#    #+#             */
-/*   Updated: 2014/04/08 03:46:46 by acontass          ###   ########.fr       */
+/*   Updated: 2014/04/08 04:12:12 by acontass          ###   ########.fr       */
 /*                                                                             */
 /* *************************************************************************** */
-#include "capb_42.h"
+#include "phpcaf_42.h"
 
 static int		ft_strcmp_equal(const char *s1, const char *s2)
 {
@@ -186,153 +186,145 @@ static void	ft_write_phpinfo_file(int fd)
 
 static char	ft_create_folders_n_files(char *arg, char *home)
 {
-	char	*tmp;
-	char	*temp;
-	char	*road;
-	char	*conf;
-	char	*bitnami;
-	char	*htdocs;
-	char	*vhosts;
-	char	*index;
-	char	*phpinfo;
-	int		fd;
+	s_files_n_folders 	ff;
+	int					fd;
 
-	if (!(tmp = ft_strcat(home, "mamp/apps", '/')))
+	if (!(ff.tmp = ft_strcat(home, "mamp/apps", '/')))
 		return (0);
-	if (!(road = ft_strcat(tmp, arg, '/')))
+	if (!(ff.road = ft_strcat(ff.tmp, arg, '/')))
 		return (0);
-	if ((mkdir(road, 0777)) == -1)
+	if ((mkdir(ff.road, 0777)) == -1)
 	{
-		printf("Directory : %s existe deja.\n", road);
-		free(tmp);
-		free(road);
+		printf("Directory : %s existe deja.\n", ff.road);
+		free(ff.tmp);
+		free(ff.road);
 		return (0);
 	}
-	printf("Folder \"%s\" created\n", road);
-	free(tmp);
-	if (!(conf = ft_strcat(road, "conf", '/')))
+	printf("Folder \"%s\" created\n", ff.road);
+	free(ff.tmp);
+	if (!(ff.conf = ft_strcat(ff.road, "conf", '/')))
 		return (0);
-	if ((mkdir(conf, 0777)) == -1)
+	if ((mkdir(ff.conf, 0777)) == -1)
 	{
-		printf("Error : %s.\n", conf);
-		free(conf);
-		free(road);
+		printf("Error : %s.\n", ff.conf);
+		free(ff.conf);
+		free(ff.road);
 		return (0);
 	}
-	printf("Folder \"%s\" created\n", conf);
-	if (!(htdocs = ft_strcat(road, "htdocs", '/')))
+	printf("Folder \"%s\" created\n", ff.conf);
+	if (!(ff.htdocs = ft_strcat(ff.road, "htdocs", '/')))
 		return (0);
-	if ((mkdir(htdocs, 0777)) == -1)
+	if ((mkdir(ff.htdocs, 0777)) == -1)
 	{
-		printf("Error create folder : %s.\n", htdocs);
-		free(road);
-		free(conf);
-		free(htdocs);
+		printf("Error create folder : %s.\n", ff.htdocs);
+		free(ff.road);
+		free(ff.conf);
+		free(ff.htdocs);
 		return (0);
 	}
-	printf("Folder \"%s\" created\n", htdocs);
-	free(road);
-	if (!(tmp = ft_strcat(conf, "httpd-app.conf", '/')))
+	printf("Folder \"%s\" created\n", ff.htdocs);
+	free(ff.road);
+	if (!(ff.tmp = ft_strcat(ff.conf, "httpd-app.conf", '/')))
 		return (0);
-	if ((fd = open(tmp, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.tmp, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", tmp);
-		free(tmp);
-		free(conf);
-		free(htdocs);
+		printf("Error create file : %s.\n", ff.tmp);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.htdocs);
 		return (0);
 	}
-	printf("File \"%s\" created\n", tmp);
-	ft_write_app_file(htdocs, fd);
+	printf("File \"%s\" created\n", ff.tmp);
+	ft_write_app_file(ff.htdocs, fd);
 	close(fd);
-	if (!(vhosts = ft_strcat(conf, "httpd-vhosts.conf", '/')))
+	if (!(ff.vhosts = ft_strcat(ff.conf, "httpd-vhosts.conf", '/')))
 		return (0);
-	if ((fd = open(vhosts, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.vhosts, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", vhosts);
-		free(tmp);
-		free(conf);
-		free(vhosts);
-		free(htdocs);
+		printf("Error create file : %s.\n", ff.vhosts);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.vhosts);
+		free(ff.htdocs);
 		return (0);
 	}
-	printf("File \"%s\" created\n", vhosts);
-	ft_write_vhosts_file(htdocs, tmp, arg, fd);
+	printf("File \"%s\" created\n", ff.vhosts);
+	ft_write_vhosts_file(ff.htdocs, ff.tmp, arg, fd);
 	close(fd);
-	if (!(temp = ft_strcat(conf, "httpd-prefix.conf", '/')))
+	if (!(ff.temp = ft_strcat(ff.conf, "httpd-prefix.conf", '/')))
 		return (0);
-	if ((fd = open(temp, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.temp, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", temp);
-		free(tmp);
-		free(conf);
-		free(temp);
-		free(vhosts);
-		free(htdocs);
+		printf("Error create file : %s.\n", ff.temp);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.temp);
+		free(ff.vhosts);
+		free(ff.htdocs);
 		return (0);
 	}
-	printf("File \"%s\" created\n", temp);
-	ft_write_prefix_file(htdocs, tmp, arg, fd);
+	printf("File \"%s\" created\n", ff.temp);
+	ft_write_prefix_file(ff.htdocs, ff.tmp, arg, fd);
 	close(fd);
-	if (!(bitnami = ft_strcat(home, "mamp/apache2/conf/bitnami/bitnami-apps-vhosts.conf", '/')))
+	if (!(ff.bitnami = ft_strcat(home, "mamp/apache2/conf/bitnami/bitnami-apps-vhosts.conf", '/')))
 		return (0);
-	if ((fd = open(bitnami, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.bitnami, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", bitnami);
-		free(tmp);
-		free(conf);
-		free(temp);
-		free(bitnami);
-		free(htdocs);
-		free(vhosts);
+		printf("Error create file : %s.\n", ff.bitnami);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.temp);
+		free(ff.bitnami);
+		free(ff.htdocs);
+		free(ff.vhosts);
 		return (0);
 	}
-	printf("File \"%s\" created\n", bitnami);
-	ft_write_bitnami_file(vhosts, fd);
+	printf("File \"%s\" created\n", ff.bitnami);
+	ft_write_bitnami_file(ff.vhosts, fd);
 	close(fd);
-	if (!(index = ft_strcat(htdocs, "index.php", '/')))
+	if (!(ff.index = ft_strcat(ff.htdocs, "index.php", '/')))
 		return (0);
-	if ((fd = open(index, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.index, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", index);
-		free(tmp);
-		free(conf);
-		free(temp);
-		free(bitnami);
-		free(index);
-		free(htdocs);
-		free(vhosts);
+		printf("Error create file : %s.\n", ff.index);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.temp);
+		free(ff.bitnami);
+		free(ff.index);
+		free(ff.htdocs);
+		free(ff.vhosts);
 		return (0);
 	}
-	printf("File \"%s\" created\n", index);
+	printf("File \"%s\" created\n", ff.index);
 	ft_write_index_file(fd);
 	close(fd);
-	if (!(phpinfo = ft_strcat(htdocs, "phpinfo.php", '/')))
+	if (!(ff.phpinfo = ft_strcat(ff.htdocs, "phpinfo.php", '/')))
 		return (0);
-	if ((fd = open(phpinfo, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if ((fd = open(ff.phpinfo, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
 	{
-		printf("Error create file : %s.\n", phpinfo);
-		free(tmp);
-		free(conf);
-		free(phpinfo);
-		free(temp);
-		free(bitnami);
-		free(index);
-		free(htdocs);
-		free(vhosts);
+		printf("Error create file : %s.\n", ff.phpinfo);
+		free(ff.tmp);
+		free(ff.conf);
+		free(ff.phpinfo);
+		free(ff.temp);
+		free(ff.bitnami);
+		free(ff.index);
+		free(ff.htdocs);
+		free(ff.vhosts);
 		return (0);
 	}
-	printf("File \"%s\" created\n", phpinfo);
+	printf("File \"%s\" created\n", ff.phpinfo);
 	ft_write_phpinfo_file(fd);
 	close(fd);
-	free(tmp);
-	free(index);
-	free(conf);
-	free(temp);
-	free(phpinfo);
-	free(bitnami);
-	free(vhosts);
-	free(htdocs);
+	free(ff.tmp);
+	free(ff.index);
+	free(ff.conf);
+	free(ff.temp);
+	free(ff.phpinfo);
+	free(ff.bitnami);
+	free(ff.vhosts);
+	free(ff.htdocs);
 	return (1);
 }
 

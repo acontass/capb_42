@@ -6,16 +6,16 @@
 #    by: acontass <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                  +#+#+#+#+#+   +#+            #
 #    Created: 2014/03/30 08:35:11 by acontass           #+#    #+#              #
-#    Updated: 2014/04/08 00:22:02 by acontass          ###   ########.fr        #
+#    Updated: 2014/04/08 04:01:02 by acontass          ###   ########.fr        #
 #                                                                               #
 #*******************************************************************************#
-NAME		=	capb_42
+NAME		=	phpcaf_42
 
 INCLUDES	=	-I includes
 
 SRCPATH		=	srcs/
 
-SRCS		=	capb_42.c
+SRCS		=	phpcaf_42.c
 
 SRC			=	$(addprefix $(SRCPATH), $(SRCS))
 
