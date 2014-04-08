@@ -6,7 +6,7 @@
 /*   by: acontass <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                 +#+#+#+#+#+   +#+           */
 /*   Created: 2014/04/08 00:17:21 by acontass           #+#    #+#             */
-/*   Updated: 2014/04/08 19:58:22 by acontass         ###   ########.fr       */
+/*   Updated: 2014/04/09 00:26:49 by acontass          ###   ########.fr       */
 /*                                                                             */
 /* *************************************************************************** */
 #include "phpcaf_42.h"
@@ -199,7 +199,7 @@ static void	ft_write_phpinfo_file(int fd)
 	write(fd, "\n<?php\n\nphpinfo();\n\n?>\n", 23);
 }
 
-static char	ft_create_folders_n_files(char *arg, char *home, char **port)
+static char	ft_create_folders_n_files(char *arg, char *home, char **port, char flag)
 {
 	s_files_n_folders 	ff;
 	int					fd;
@@ -281,22 +281,44 @@ static char	ft_create_folders_n_files(char *arg, char *home, char **port)
 	printf("File \"%s\" created\n", ff.temp);
 	ft_write_prefix_file(ff.htdocs, ff.tmp, arg, fd);
 	close(fd);
-	if (!(ff.bitnami = ft_strcat(home, "mamp/apache2/conf/bitnami/bitnami-apps-vhosts.conf", '/')))
-		return (0);
-	if ((fd = open(ff.bitnami, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+	if (!flag)
 	{
-		printf("Error create file : %s.\n", ff.bitnami);
-		free(ff.tmp);
-		free(ff.conf);
-		free(ff.temp);
-		free(ff.bitnami);
-		free(ff.htdocs);
-		free(ff.vhosts);
-		return (0);
+		if (!(ff.bitnami = ft_strcat(home, "mamp/apache2/conf/bitnami/bitnami-apps-vhosts.conf", '/')))
+			return (0);
+		if ((fd = open(ff.bitnami, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+		{
+			printf("Error create file : %s.\n", ff.bitnami);
+			free(ff.tmp);
+			free(ff.conf);
+			free(ff.temp);
+			free(ff.bitnami);
+			free(ff.htdocs);
+			free(ff.vhosts);
+			return (0);
+		}
+		printf("File \"%s\" modified\n", ff.bitnami);
+		ft_write_bitnami_file(ff.vhosts, fd);
+		close(fd);
 	}
-	printf("File \"%s\" created\n", ff.bitnami);
-	ft_write_bitnami_file(ff.vhosts, fd);
-	close(fd);
+	else
+	{
+		if (!(ff.bitnami = ft_strcat(home, "mamp/apache2/conf/bitnami/bitnami-apps-prefix.conf", '/')))
+			return (0);
+		if ((fd = open(ff.bitnami, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+		{
+			printf("Error create file : %s.\n", ff.bitnami);
+			free(ff.tmp);
+			free(ff.conf);
+			free(ff.temp);
+			free(ff.bitnami);
+			free(ff.htdocs);
+			free(ff.vhosts);
+			return (0);
+		}
+		printf("File \"%s\" modified\n", ff.bitnami);
+		ft_write_bitnami_file(ff.temp, fd);
+		close(fd);
+	}
 	if (!(ff.index = ft_strcat(ff.htdocs, "index.php", '/')))
 		return (0);
 	if ((fd = open(ff.index, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
@@ -347,21 +369,24 @@ int			main(int ac, char **av, char **env)
 {
 	int		count;
 	char	*home;
+	char	flag;
 
 	if (ac > 1)
 	{
+		flag = 0;
 		count = 0;
-		if (!(strcmp("-prefix", av[1])) || (av[2] && !(strcmp("-prefix", av[2]))))
-			count++;
-		if ((av[1][0] == '-' && av[1][1] == 'p') ||(av[2] && av[2][0] == '-' && av[2][1] == 'p'))
-			count++;
-		if (av[1][0] == '-' && av[1][1] == 'p' && !av[2])
-			write(1, "Usage : ./phpcaf_42 [-p[port]] [-prefix] app1 app2 ...\n", 55);
+		if ((av[1] && !(strcmp("-l", av[1]))) || (av[2] && !(strcmp("-l", av[2]))))
+			flag = 1;
+		if ((av[1] && av[1][0] == '-' && av[1][1] == 'p' && !av[2]) || (av[2] && av[2][0] == '-' && av[2][1] == 'p' && !av[3]) || (av[1] && !(strcmp("-l", av[1])) && !av[2]) || (av[2] && !(strcmp("-l", av[2])) && !av[3]))
+			write(1, "Usage : ./phpcaf_42 [-p[port]] [-l] app1 app2 ...\n", 50);
 		if (!(home = ft_home(env)))
 			return (0);
+		while (av[++count] && av[count][0] && av[count][0] == '-')
+			;
+		count--;
 		while (av[++count])
 		{
-			if (!(ft_create_folders_n_files(av[count], home, av)))
+			if (!(ft_create_folders_n_files(av[count], home, av, flag)))
 			{
 				free(home);
 				return (0);
@@ -370,6 +395,6 @@ int			main(int ac, char **av, char **env)
 		free(home);
 	}
 	else
-		write(1, "Usage : ./phpcaf_42 [-p[port]] [-prefix] app1 app2 ...\n", 55);
+		write(1, "Usage : ./phpcaf_42 [-p[port]] [-l] app1 app2 ...\n", 50);
 	return (0);
 }
