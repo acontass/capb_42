@@ -6,7 +6,7 @@
 /*   by: acontass <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                 +#+#+#+#+#+   +#+           */
 /*   Created: 2014/04/08 00:17:21 by acontass           #+#    #+#             */
-/*   Updated: 2014/04/08 04:12:12 by acontass          ###   ########.fr       */
+/*   Updated: 2014/04/08 19:58:22 by acontass         ###   ########.fr       */
 /*                                                                             */
 /* *************************************************************************** */
 #include "phpcaf_42.h"
@@ -63,7 +63,7 @@ static char	*ft_strcat(char *s1, char *s2, char c)
 	count[1] = -1;
 	while (s2[++count[1]])
 		;
-	count[0] = count[0]++;
+	count[0]++;
 	if (!(ret = malloc(sizeof(*ret) * (count[0] + count[1] + 1))))
 		return (0);
 	count[0] = -1;
@@ -100,11 +100,26 @@ static void	ft_write_app_file(char *htdocs, int fd)
 	write(fd, "</Directory>\n", 13);
 }
 
-static void	ft_write_vhosts_file(char *htdocs, char *tmp, char *arg, int fd)
+static void	ft_write_vhosts_file(char *htdocs, char *tmp, char *arg, int fd, char **port)
 {
 	int		count;
 
-	write(fd, "\n<VirtualHost *:8080>\n", 22);
+	write(fd, "\n<VirtualHost *:", 16);
+	if (port[1][0] == '-' && port[1][1] == 'p')
+	{
+		count = 1;
+		while (port[1][++count])
+			write(fd, &port[1][count], 1);
+	}
+	else if (port[2] && port[2][0] == '-' && port[2][1] == 'p')
+	{
+		count = 1;
+		while (port[2][++count])
+			write(fd, &port[2][count], 1);
+	}
+	else
+		write(fd, "8080", 4);
+	write(fd, ">\n", 2);
 	write(fd, "\tServerName ", 12);
 	count = -1;
 	while (arg[++count])
@@ -131,7 +146,7 @@ static void	ft_write_prefix_file(char *htdocs, char *tmp, char *arg, int fd)
 	int		count;
 
 	count = -1;
-	write(fd, "Alias /", 7);
+	write(fd, "\nAlias /", 8);
 	while (arg[++count])
 		;
 	write(fd, arg, count);
@@ -184,7 +199,7 @@ static void	ft_write_phpinfo_file(int fd)
 	write(fd, "\n<?php\n\nphpinfo();\n\n?>\n", 23);
 }
 
-static char	ft_create_folders_n_files(char *arg, char *home)
+static char	ft_create_folders_n_files(char *arg, char *home, char **port)
 {
 	s_files_n_folders 	ff;
 	int					fd;
@@ -249,7 +264,7 @@ static char	ft_create_folders_n_files(char *arg, char *home)
 		return (0);
 	}
 	printf("File \"%s\" created\n", ff.vhosts);
-	ft_write_vhosts_file(ff.htdocs, ff.tmp, arg, fd);
+	ft_write_vhosts_file(ff.htdocs, ff.tmp, arg, fd, port);
 	close(fd);
 	if (!(ff.temp = ft_strcat(ff.conf, "httpd-prefix.conf", '/')))
 		return (0);
@@ -336,11 +351,17 @@ int			main(int ac, char **av, char **env)
 	if (ac > 1)
 	{
 		count = 0;
+		if (!(strcmp("-prefix", av[1])) || (av[2] && !(strcmp("-prefix", av[2]))))
+			count++;
+		if ((av[1][0] == '-' && av[1][1] == 'p') ||(av[2] && av[2][0] == '-' && av[2][1] == 'p'))
+			count++;
+		if (av[1][0] == '-' && av[1][1] == 'p' && !av[2])
+			write(1, "Usage : ./phpcaf_42 [-p[port]] [-prefix] app1 app2 ...\n", 55);
 		if (!(home = ft_home(env)))
 			return (0);
 		while (av[++count])
 		{
-			if (!(ft_create_folders_n_files(av[count], home)))
+			if (!(ft_create_folders_n_files(av[count], home, av)))
 			{
 				free(home);
 				return (0);
@@ -348,5 +369,7 @@ int			main(int ac, char **av, char **env)
 		}
 		free(home);
 	}
+	else
+		write(1, "Usage : ./phpcaf_42 [-p[port]] [-prefix] app1 app2 ...\n", 55);
 	return (0);
 }
